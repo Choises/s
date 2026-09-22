@@ -377,7 +377,9 @@
 
     </div>
     <!-- 🎶 ΤΟ ΚΡΥΦΟ ΠΛΑΙΣΙΟ ΤΗΣ ΛΙΣΤΑΣ ΤΡΑΓΟΥΔΙΩΝ ΜΕΣΑ ΣΤΟΝ PLAYER -->
-    <div id="embedded-playlist" style="display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; border-radius: 10px; background: rgba(20, 24, 31, 0.65); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-sizing: border-box; padding: 15px; overflow-y: auto; z-index: 9999; border: 1px solid rgba(255, 255, 255, 0.05);">
+        <!-- 🎶 ΤΟ ΕΝΙΣΧΥΜΕΝΟ ΠΛΑΙΣΙΟ ΤΗΣ ΛΙΣΤΑΣ (ΜΕ ΥΨΗΛΟ Z-INDEX ΚΑΙ ΣΤΑΘΕΡΟ ΦΟΝΤΟ) -->
+    <div id="embedded-playlist" style="display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; border-radius: 10px; background: #14181f !important; box-sizing: border-box; padding: 15px; overflow-y: auto; z-index: 999999 !important; border: 1px solid rgba(255, 255, 255, 0.05); pointer-events: auto;">
+
            <!-- Ο ΤΙΤΛΟΣ ΜΑΖΙ ΜΕ ΤΟ ΚΟΚΚΙΝΟ ΚΟΥΜΠΙ ΚΛΕΙΣΙΜΑΤΟΣ (X) -->
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2c3545; padding-bottom: 5px; margin-bottom: 15px;">
         <span style="color: #00ffcc; font-size: 16px; font-weight: bold;">🎵 Λίστα Τραγουδιών</span>
@@ -443,7 +445,31 @@
 
     const songTitle = document.getElementById('song-title');
     const artistName = document.getElementById('artist-name');
-
+// 3. Η ΔΙΚΗ ΣΑΣ ΛΙΣΤΑ ΤΡΑΓΟΥΔΙΩΝ (ON-DEMAND PLAYLIST)
+  // Μπορείτε να βάλετε είτε αρχεία ήχου .mp3 είτε αρχεία βίντεο .mp4!
+  const onDemandTracks = [
+    {
+      title: "Όνομα Τραγουδιού 1",
+      artist: "Καλλιτέχνης 1",
+      fileUrl: "https://ia600607.us.archive.org/9/items/latin-2025/Latin2025.mp3",
+      coverUrl: "https://xatimg.com/image/rbA6aOxjB0au.png", // <- ΦΩΤΟΓΡΑΦΙΑ ΚΑΛΛΙΤΕΧΝΗ 1
+      isTextOnly: true
+    },
+    {
+      title: "Όνομα Τραγουδιού 2",
+      artist: "Καλλιτέχνης 2",
+      fileUrl: "https://ia800706.us.archive.org/19/items/classic-rock_202607/Classic%20Rock.mp3",
+      coverUrl: "https://xatimg.com/image/9kFArAT470H7.jpg", // <- ΦΩΤΟΓΡΑΦΙΑ ΚΑΛΛΙΤΕΧΝΗ 2
+      isTextOnly: true
+    },
+    {
+      title: "Βίντεο Κλιπ Δοκιμή",
+      artist: "Καλλιτέχνης Βίντεο",
+      fileUrl: "https://choises.github.io/vy/GT.mp4",
+      coverUrl: "", // Το βίντεο δεν χρειάζεται φωτογραφία
+      isTextOnly: false
+    }
+  ];
     function updateClock() {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, '0');
@@ -579,7 +605,7 @@
         }
     }
 
-    // 🎶 Ανοιγοκλείσιμο Λίστας Τραγουδιών (ΜΟΝΟ ΜΙΑ ΦΟΡΑ ΟΡΙΣΜΕΝΗ!)
+       // 🎶 Ανοιγοκλείσιμο Λίστας Τραγουδιών (Με 100% εξαφάνιση του Chat για ξεκλείδωμα των κλικς!)
     function togglePlaylistView() {
       const playlistPanel = document.getElementById('embedded-playlist');
       const chatFrame = document.getElementById('embedded-chat');
@@ -588,17 +614,28 @@
 
       if (playlistPanel.style.display === 'none' || playlistPanel.style.display === '') {
         playlistPanel.style.display = 'block';
+        playlistPanel.style.pointerEvents = 'auto'; // Ξεκλειδώνει τα κλικς της λίστας
         if (videoElement) videoElement.style.display = 'none';
+        
+        // 🔥 ΚΛΕΙΔΙ: Εξαφανίζουμε τελείως το Chat για να μην κλέβει τα κλικς των MP3/MP4!
         if (chatFrame) {
+            chatFrame.style.display = 'none';
             chatFrame.style.opacity = "0";
             chatFrame.style.pointerEvents = "none";
         }
       } else {
         playlistPanel.style.display = 'none';
+        playlistPanel.style.pointerEvents = 'none';
         if (videoElement) videoElement.style.display = 'block';
+        
+        // Επαναφέρουμε την υποδομή του Chat στο παρασκήνιο όταν κλείνει η λίστα
+        if (chatFrame) {
+            chatFrame.style.display = 'block';
+        }
         returnToLiveStream();
       }
     }
+
 
     // ⚡ Ο ΜΗΧΑΝΙΣΜΟΣ ΠΟΥ ΠΑΙΖΕΙ ΚΑΙ .MP3 ΚΑΙ .MP4 ON-DEMAND
     function playOnDemand(index) {
@@ -631,10 +668,15 @@
             videoElement.addEventListener('ended', returnToLiveStream, { once: true });
           }
         }
-        const playlistPanel = document.getElementById('embedded-playlist');
+                const playlistPanel = document.getElementById('embedded-playlist');
         if (playlistPanel) playlistPanel.style.display = 'none';
         if (videoElement && track.isTextOnly) videoElement.style.display = 'block';
+
+        // 🔥 Επαναφέρουμε την υποδομή του Chat μόλις ξεκινήσει το τραγούδι!
+        const chatFrame = document.getElementById('embedded-chat');
+        if (chatFrame) chatFrame.style.display = 'block';
     }
+
 
     function closePlaylistAndReturn() {
       togglePlaylistView(); 

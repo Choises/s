@@ -551,7 +551,7 @@
 
     // 📺 Ο ΜΗΧΑΝΙΣΜΟΣ ΠΟΥ ΠΑΙΖΕΙ ΚΑΙ .M3U8 ΚΑΙ .MP4 ΒΙΝΤΕΟ!
     const videoElement = document.getElementById('bg-video');
-    const videoSource = "https://streams.ovh"; 
+    const videoSource = "https://eco.streams.ovh:8081/barazatv/index.m3u8"; 
     let hls = null;
 
     function initHLS() {
@@ -656,7 +656,7 @@
           videoElement.play().catch(e => console.log(e));
         }
 
-        audio.src = 'https://rcast.net'; audio.load(); audio.play();
+        audio.src = 'https://stream.rcast.net/200586'; audio.load(); audio.play();
         document.getElementById('play-icon').className = "fas fa-pause";
         isPlaying = true;
     }

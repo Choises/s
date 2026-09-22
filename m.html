@@ -368,7 +368,8 @@
 
 
 <!-- ΤΟ ΚΡΥΦΟ ΠΛΑΙΣΙΟ ΤΟΥ CHAT ΜΕ ΑΔΕΙΑ ΜΙΚΡΟΦΩΝΟΥ 🎙️ -->
-    <iframe id="embedded-chat" src="https://choises.github.io/t/tr" allow="microphone; microphone *" scrolling="no" style="display: block; width: 100%; height: 100%; min-height: 220px; max-height: 350px; border: none; border-radius: 10px; background: transparent; overflow: hidden; box-sizing: border-box; position: absolute; top: 0; left: 0; z-index: 3; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;"></iframe>
+        <iframe id="embedded-chat" src="https://choises.github.io/t/tr" allow="microphone; microphone *" scrolling="no" style="display: block; width: 100%; height: 100%; min-height: 220px; max-height: 100%; border: none; border-radius: 10px; background: transparent; overflow: hidden; box-sizing: border-box; position: absolute; top: 0; left: 0; z-index: 3; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;"></iframe>
+
 
 
 
@@ -517,77 +518,48 @@
 
     loadTrack(0);
 
-    // 💬 Εναλλαγή Οθόνης Chat με έλεγχο Opacity για να μην πέφτει μαύρο στο Live Βίντεο!
+       // 💬 Εναλλαγή Οθόνης Chat με έλεγχο Opacity για να μην πέφτει μαύρο στο Live Βίντεο!
     function toggleChatView() {
         const chatFrame = document.getElementById('embedded-chat');
         const playlistPanel = document.getElementById('embedded-playlist');
 
         if (!chatFrame) return;
 
-        // Ελέγχουμε αν το chat είναι κλειστό (αόρατο)
         if (chatFrame.style.opacity === "0" || chatFrame.style.opacity === "") {
-            // 1. ΕΜΦΑΝΙΖΟΥΜΕ ΤΟ CHAT
             chatFrame.style.opacity = "1";
-            chatFrame.style.pointerEvents = "auto"; // Ξεκλειδώνει το κλικ για να γράφετε
-            
-            // Κλείνουμε τη λίστα αν ήταν ανοιχτή, το βίντεο μένει live από πίσω!
+            chatFrame.style.pointerEvents = "auto"; 
             if (playlistPanel) playlistPanel.style.display = 'none';
-            
-            // Αλλάζουμε το εικονίδιο σε νότα
             document.getElementById('open-chat-btn').innerHTML = '<i class="fas fa-music"></i>';
         } else {
-            // 1. ΚΡΥΒΟΥΜΕ ΤΟ CHAT (Γίνεται "αέρας")
             chatFrame.style.opacity = "0";
-            chatFrame.style.pointerEvents = "none"; // Ξεκλειδώνει αμέσως όλα τα κουμπιά του Player από πίσω!
-            
-            // Επαναφέρουμε το συννεφάκι
+            chatFrame.style.pointerEvents = "none"; 
             document.getElementById('open-chat-btn').innerHTML = '<i class="far fa-comment"></i>';
         }
     }
 
     const volumeBar = document.getElementById('volume-bar');
 
-    // Μόλις ανοίγει η σελίδα, κλειδώνουμε την ένταση του ραδιοφώνου στο 50%
     if (audio) {
         audio.volume = 0.5;
     }
 
-    // Ακούμε live πότε ο ακροατής σέρνει την μπάρα για να αλλάξει η ένταση
     if (volumeBar) {
         volumeBar.addEventListener('input', (e) => {
-            if (audio) {
-                audio.volume = e.target.value;
-            }
+            if (audio) { audio.volume = e.target.value; }
         });
     }
 
     // 📺 Ο ΜΗΧΑΝΙΣΜΟΣ ΠΟΥ ΠΑΙΖΕΙ ΚΑΙ .M3U8 ΚΑΙ .MP4 ΒΙΝΤΕΟ!
     const videoElement = document.getElementById('bg-video');
-    const videoSource = "https://gra1.crystalweb.net:1936/barazatv/barazatv/playlist.m3u8"; 
-
-    // Ορίζουμε το hls global για να μπορούμε να το ελέγχουμε παντού στον κώδικα
+    const videoSource = "https://streams.ovh"; 
     let hls = null;
 
     function initHLS() {
       if (videoElement) {
         if (videoSource.endsWith('.m3u8')) {
           if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-            hls = new Hls({
-              maxBufferLength: 30,
-              maxMaxBufferLength: 60,
-              maxBufferSize: 30 * 1000 * 1000,
-              enableWorker: true,
-              lowLatencyMode: false
-            });
-            hls.loadSource(videoSource);
-            hls.attachMedia(videoElement);
-            
-            hls.on('hlsError', function(event, data) {
-              if (data.fatal) {
-                if (data.type === 'networkError') { hls.startLoad(); }
-                else if (data.type === 'mediaError') { hls.recoverMediaError(); }
-              }
-            });
+            hls = new Hls({ maxBufferLength: 30, maxMaxBufferLength: 60, maxBufferSize: 30 * 1000 * 1000, enableWorker: true, lowLatencyMode: false });
+            hls.loadSource(videoSource); hls.attachMedia(videoElement);
           } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
             videoElement.src = videoSource;
           }
@@ -598,122 +570,77 @@
     }
     initHLS();
 
-    // 🔊 Λειτουργία για το άνοιγμα/κλείσιμο του ήχου του βίντεο
     function toggleVideoSound() {
         const vid = document.getElementById('bg-video');
         const muteIcon = document.getElementById('video-mute-icon');
-        
         if (vid) {
-            if (vid.muted) {
-                vid.muted = false; 
-                muteIcon.className = "fas fa-volume-up";
-            } else {
-                vid.muted = true; 
-                muteIcon.className = "fas fa-volume-mute";
-            }
+            if (vid.muted) { vid.muted = false; muteIcon.className = "fas fa-volume-up"; } 
+            else { vid.muted = true; muteIcon.className = "fas fa-volume-mute"; }
         }
     }
 
-             // 🎶 Ανοιγοκλείσιμο Λίστας Τραγουδιών (Συγχρονισμένο με το "Χ" και το Chat)
-  function togglePlaylistView() {
-    const playlistPanel = document.getElementById('embedded-playlist');
-    const chatFrame = document.getElementById('embedded-chat');
+    // 🎶 Ανοιγοκλείσιμο Λίστας Τραγουδιών (ΜΟΝΟ ΜΙΑ ΦΟΡΑ ΟΡΙΣΜΕΝΗ!)
+    function togglePlaylistView() {
+      const playlistPanel = document.getElementById('embedded-playlist');
+      const chatFrame = document.getElementById('embedded-chat');
 
-    if (!playlistPanel) return;
+      if (!playlistPanel) return;
 
-    if (playlistPanel.style.display === 'none' || playlistPanel.style.display === '') {
-      playlistPanel.style.display = 'block';
-      if (videoElement) videoElement.style.display = 'none';
-      if (chatFrame) {
-          chatFrame.style.opacity = "0";
-          chatFrame.style.pointerEvents = "none";
+      if (playlistPanel.style.display === 'none' || playlistPanel.style.display === '') {
+        playlistPanel.style.display = 'block';
+        if (videoElement) videoElement.style.display = 'none';
+        if (chatFrame) {
+            chatFrame.style.opacity = "0";
+            chatFrame.style.pointerEvents = "none";
+        }
+      } else {
+        playlistPanel.style.display = 'none';
+        if (videoElement) videoElement.style.display = 'block';
+        returnToLiveStream();
       }
-    } else {
-      playlistPanel.style.display = 'none';
-      if (videoElement) videoElement.style.display = 'block';
-      returnToLiveStream(); // Επιστρέφει αυτόματα στην αρχική ζωντανή ροή!
     }
-  }
 
-
-
-    // 3. Η ΔΙΚΗ ΣΑΣ ΛΙΣΤΑ ΤΡΑΓΟΥΔΙΩΝ (ON-DEMAND PLAYLIST)
-    const onDemandTracks = [
-      {
-        title: "Όνομα Τραγουδιού 1",
-        artist: "Καλλιτέχνης 1",
-        fileUrl: "https://ia600607.us.archive.org/9/items/latin-2025/Latin2025.mp3",
-        coverUrl: "https://xatimg.com/image/rbA6aOxjB0au.png", 
-        isTextOnly: true
-      },
-      {
-        title: "Όνομα Τραγουδιού 2",
-        artist: "Καλλιτέχνης 2",
-        fileUrl: "https://ia800706.us.archive.org/19/items/classic-rock_202607/Classic%20Rock.mp3",
-        coverUrl: "https://xatimg.com/image/9kFArAT470H7.jpg", 
-        isTextOnly: true
-      },
-      {
-        title: "Βίντεο Κλιπ Δοκιμή",
-        artist: "Καλλιτέχνης Βίντεο",
-        fileUrl: "https://choises.github.io/vy/GT.mp4",
-        coverUrl: "", 
-        isTextOnly: false
-      }
-    ];
-
-     // 4. Ο ΕΝΙΣΧΥΜΕΝΟΣ ΜΗΧΑΝΙΣΜΟΣ ΠΟΥ ΠΑΙΖΕΙ ΚΑΙ .MP3 ΚΑΙ .MP4 ON-DEMAND
-       // 4. Ο ΕΝΙΣΧΥΜΕΝΟΣ ΜΗΧΑΝΙΣΜΟΣ ΠΟΥ ΠΑΙΖΕΙ ΚΑΙ .MP3 ΚΑΙ .MP4 ON-DEMAND
+    // ⚡ Ο ΜΗΧΑΝΙΣΜΟΣ ΠΟΥ ΠΑΙΖΕΙ ΚΑΙ .MP3 ΚΑΙ .MP4 ON-DEMAND
     function playOnDemand(index) {
-    const track = onDemandTracks[index];
-    if (!track) return;
+        const track = onDemandTracks[index];
+        if (!track) return;
 
-    audio.pause(); audio.src = ""; isPlaying = false;
-    document.getElementById('play-icon').className = "fas fa-play";
-    document.getElementById('song-title').innerText = track.title;
-    document.getElementById('artist-name').innerText = track.artist;
+        audio.pause(); audio.src = ""; isPlaying = false;
+        document.getElementById('play-icon').className = "fas fa-play";
+        document.getElementById('song-title').innerText = track.title;
+        document.getElementById('artist-name').innerText = track.artist;
 
-    if (hls) { hls.detachMedia(); }
+        if (hls) { hls.detachMedia(); }
 
-    const coverBox = document.getElementById('mp3-cover-box');
+        const coverBox = document.getElementById('mp3-cover-box');
 
-    if (track.isTextOnly) {
-      // 🎵 ΑΝΑΠΑΡΑΓΩΓΗ MP3
-      audio.src = track.fileUrl; audio.load(); audio.play().catch(e => console.log(e));
-      
-      // Εμφανίζουμε τη σταθερή εικόνα του καλλιτέχνη
-      if (coverBox && track.coverUrl) {
-        coverBox.style.backgroundImage = `url('${track.coverUrl}')`;
-        coverBox.style.display = 'block';
-      }
-      
-      // Ξαναξεκινάμε το live stream m3u8 να παίζει αθόρυβα από πίσω
-      if (videoElement && videoSource.endsWith('.m3u8')) {
-        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-          hls.attachMedia(videoElement); hls.loadSource(videoSource);
+        if (track.isTextOnly) {
+          audio.src = track.fileUrl; audio.load(); audio.play().catch(e => console.log(e));
+          if (coverBox && track.coverUrl) {
+            coverBox.style.backgroundImage = `url('${track.coverUrl}')`;
+            coverBox.style.display = 'block';
+          }
+          if (videoElement && videoSource.endsWith('.m3u8')) { initHLS(); }
+        } else {
+          if (coverBox) coverBox.style.display = 'none'; 
+          if (videoElement) {
+            videoElement.style.display = 'block';
+            videoElement.src = track.fileUrl; videoElement.load(); videoElement.muted = false;
+            videoElement.play().catch(e => console.log(e));
+            document.getElementById('video-mute-icon').className = "fas fa-volume-up";
+            videoElement.addEventListener('ended', returnToLiveStream, { once: true });
+          }
         }
-      }
-    } else {
-      // 🎬 ΑΝΑΠΑΡΑΓΩΓΗ MP4 (ΒΙΝΤΕΟ ΚΛΙΠ)
-      if (coverBox) coverBox.style.display = 'none'; // Σβήνουμε την εικόνα του MP3
-      
-      if (videoElement) {
-        videoElement.src = track.fileUrl; videoElement.load(); videoElement.muted = false;
-        videoElement.play().catch(e => console.log(e));
-        document.getElementById('video-mute-icon').className = "fas fa-volume-up";
-        
-        // 🔄 ΑΚΡΟΑΣΗ ΓΙΑ ΤΟ ΤΕΛΟΣ ΤΟΥ MP4 -> ΑΥΤΟΜΑΤΗ ΕΠΙΣΤΡΟΦΗ
-        videoElement.addEventListener('ended', returnToLiveStream, { once: true });
-      }
+        const playlistPanel = document.getElementById('embedded-playlist');
+        if (playlistPanel) playlistPanel.style.display = 'none';
+        if (videoElement && track.isTextOnly) videoElement.style.display = 'block';
     }
 
-togglePlaylistView();}//   // ❌ Λειτουργία όταν πατάμε το "Χ" της Λίστας
-  function closePlaylistAndReturn() {
-    togglePlaylistView(); // Κλείνει το παράθυρο της λίστας
-    returnToLiveStream(); // Επιστρέφει αυτόματα στην αρχική θέση!
-  }
+    function closePlaylistAndReturn() {
+      togglePlaylistView(); 
+      returnToLiveStream(); 
+    }
 
-    // 🔄 Η συνάρτηση της Απόλυτης Επιστροφής στην Αρχική ΘΕΣΗ
     function returnToLiveStream() {
         document.getElementById('song-title').innerText = "📻 Panagiotis Live";
         document.getElementById('artist-name').innerText = "PM Panagiotis & PJ Lady Punk";
@@ -722,20 +649,37 @@ togglePlaylistView();}//   // ❌ Λειτουργία όταν πατάμε τ�
         if (coverBox) coverBox.style.display = 'none';
 
         if (videoElement) {
-          videoElement.style.display = 'block'; // Εμφάνιση οθόνης
+          videoElement.style.display = 'block';
           videoElement.muted = true;
           document.getElementById('video-mute-icon').className = "fas fa-volume-mute";
-          initHLS(); // 🔥 Επανέναρξη του live stream
+          initHLS();
           videoElement.play().catch(e => console.log(e));
         }
 
-        audio.src = 'https://status.rcast.net/200586'; audio.load(); audio.play();
+        audio.src = 'https://rcast.net'; audio.load(); audio.play();
         document.getElementById('play-icon').className = "fas fa-pause";
         isPlaying = true;
     }
 
-// 🔗 Ενισχυμένη Λειτουργία Αντιγραφής για να παίζει παντού (https & http)function copyRadioLink() {const currentLink = window.location.href;const btnText = document.getElementById('share-btn-text');if (navigator.clipboard && navigator.clipboard.writeText) {navigator.clipboard.writeText(currentLink).then(() => {showSuccessMessage(btnText);}).catch(() => {fallbackCopy(currentLink, btnText);});} else {fallbackCopy(currentLink, btnText);}}function fallbackCopy(text, element) {const textArea = document.createElement("textarea");textArea.value = text;textArea.style.position = "fixed";document.body.appendChild(textArea);textArea.focus();textArea.select();try {document.execCommand('copy');showSuccessMessage(element);} catch (err) {console.error('Αποτυχία αντιγραφής', err);}document.body.removeChild(textArea);}function showSuccessMessage(element) {if (element) {element.innerText = "Αντιγράφηκε! ✅";setTimeout(() => {element.innerText = "Share";}, 2000);}}
+    function copyRadioLink() {
+      const currentLink = window.location.href;
+      const btnText = document.getElementById('share-btn-text');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(currentLink).then(() => { showSuccessMessage(btnText); }).catch(() => { fallbackCopy(currentLink, btnText); });
+      } else { fallbackCopy(currentLink, btnText); }
+    }
 
- </script>
+    function fallbackCopy(text, element) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text; textArea.style.position = "fixed"; document.body.appendChild(textArea);
+      textArea.focus(); textArea.select();
+      try { document.execCommand('copy'); showSuccessMessage(element); } catch (err) {}
+      document.body.removeChild(textArea);
+    }
+
+    function showSuccessMessage(element) {
+      if (element) { element.innerText = "Αντιγράφηκε! ✅"; setTimeout(() => { element.innerText = "Share"; }, 2000); }
+    }
+</script>
 </body>
 </html>
